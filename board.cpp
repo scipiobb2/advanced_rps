@@ -152,7 +152,7 @@ void Board::resolveDisputedCoordinates(){
     m_disputedCoordinates.clear();
 }
 
-void Board::makeNextMove(unsigned int errorLine, unsigned int m_winnerId)
+void Board::makeNextMove(unsigned int m_winnerId)
 {
     bool makeJokerMove;
     bool delayedNotValid = false;
@@ -171,7 +171,7 @@ void Board::makeNextMove(unsigned int errorLine, unsigned int m_winnerId)
 
     auto nextMove = nextMoveSearch->second.second;
 
-    if (nextMove.getLineNumber() == errorLine)
+    if (nextMove.getLineNumber() == m_initialMovesErrorLine)
     {
         if (nextMove.getPlayerId() == m_winnerId)
             delayedNotValid = true;

@@ -23,8 +23,7 @@ public:
 
     void resolveDisputedCoordinates();
 
-    void makeNextMove(unsigned int errorLine = 0,
-                      unsigned int m_winnerId = 0);
+    void makeNextMove(unsigned int m_winnerId = 0);
 
     //For debug
     void makeXMoves(unsigned int numberOfMoves);
@@ -56,6 +55,9 @@ public:
     bool getmIsValid() const {return  m_isValid;}
     void setNotValid(){m_isValid = false; }
 
+    unsigned int getInitialMovesErrorLine() const {return m_initialMovesErrorLine;}
+    void setInitialMovesErrorLine(unsigned int lineNumber){m_initialMovesErrorLine = lineNumber;}
+
 
     friend std::ostream &operator<<(std::ostream &os, const Board &board);
 
@@ -81,6 +83,8 @@ private:
 
     unsigned int m_numOfMovesPlayed = 0;
     unsigned int m_moveNumberInMovesMap = 0;
+
+    unsigned int m_initialMovesErrorLine = 0;
 
 };
 

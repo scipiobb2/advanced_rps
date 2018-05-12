@@ -19,7 +19,7 @@ private:
     std::vector<Player *> m_players;
     unsigned int m_winnerId = 0;
     bool m_isEnded = false;
-    unsigned int m_errorLine = 0;
+    //unsigned int m_errorLine = 0;
     std::string m_endGameReason;
 
     bool checkInitialPositionValidity();

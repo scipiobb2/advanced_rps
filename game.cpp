@@ -41,8 +41,8 @@ void Game::playGame()
             m_endGameReason = "Reason: A tie - both Moves input files done without a winner\n";
             break;
         }
-        m_board.makeNextMove(m_errorLine, m_winnerId);
-        if (!m_board.getmIsValid() && m_errorLine)
+        m_board.makeNextMove(m_winnerId);
+        if (!m_board.getmIsValid() && m_board.getInitialMovesErrorLine())
             m_isEnded = true;
         else if (!m_board.getBadMovesInputError().continueFlow())
         {
@@ -275,7 +275,8 @@ bool Game::checkInitialMovesValidity()
     if (minErrorLine != 0)
     {
         m_winnerId = possibleWinnerId;
-        m_errorLine = minErrorLine;
+        m_board.setInitialMovesErrorLine(minErrorLine);
+        //m_errorLine = minErrorLine;
         return false;
     }
 
