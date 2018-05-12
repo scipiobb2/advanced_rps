@@ -10,6 +10,7 @@ Board::Board(unsigned int n, unsigned int m,
                                 std::vector<Player *> vectorPlayers):
     m_numOfColumns(n), m_numOfRows(m)
 {
+    // Add all pieces and moves form the input files to the board
     for (Player *p: vectorPlayers )
     {
         if (p->getBadPositioningError().continueFlow())
