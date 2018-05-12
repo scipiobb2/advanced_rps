@@ -33,6 +33,38 @@ bool Board::isPieceLocationWithinRestrictions(Coordinate const coordinate ) cons
     return true;
 }
 
+bool Board::isPieceAtLocation(auto const existingKey, unsigned int playerId) const
+{
+    if (existingKey == m_piecesOnBoard.end())
+        return false;
+
+    if (existingKey->second.size() == 0)
+        return false;
+
+    if (existingKey->second[0]->getOwnerId() != playerId)
+        return false;
+
+    return true;
+}
+
+unsigned int Board::isJokerMoveAndChangingValid(Coordinate const toCoordinate,
+                             auto const existingKey, Coordinate const jokerLocation) const
+{
+    // Not relevant for this test
+    if (!(existingKey->second[0]->isJoker()))
+        return 0;
+
+    // Joker is moved before it can be changed
+    if (existingKey->second[0]->getCoordinate() == jokerLocation)
+        return -1;
+
+    // Joker is moved and then it is changed
+    if (toCoordinate == jokerLocation)
+        return 1;
+
+    return 0;
+}
+
 void Board::addPieceToBoard(Piece* piece)
 {
     Coordinate keyCoordinate = piece->getCoordinate();
@@ -154,7 +186,7 @@ void Board::resolveDisputedCoordinates(){
 
 void Board::makeNextMove(unsigned int m_winnerId)
 {
-    bool makeJokerMove;
+    bool makeJokerMove = false;
     bool delayedNotValid = false;
 
     // A safety, to guard against the next while loop
@@ -171,10 +203,16 @@ void Board::makeNextMove(unsigned int m_winnerId)
 
     auto nextMove = nextMoveSearch->second.second;
 
+    // The moves file has an error but we must play the game until
+    // that error is reached
     if (nextMove.getLineNumber() == m_initialMovesErrorLine)
     {
+        // If this is the winners turn, the turn is played
+        // before the game ends
         if (nextMove.getPlayerId() == m_winnerId)
             delayedNotValid = true;
+        // If this is the losers turn he loses immediately
+        // (He can't make a turn anyway...)
         else
             {
                 m_isValid = false;
@@ -183,61 +221,50 @@ void Board::makeNextMove(unsigned int m_winnerId)
     }
 
     Coordinate keyCoordinate = nextMove.getFromCoordinate();
-    Coordinate keyCoordinateJoker = nextMove.getFromCoordinate();
+    Coordinate keyCoordinateJoker;
+
     auto existingKey = m_piecesOnBoard.find(keyCoordinate);
+
+    // Can't initialize empty
     auto existingKeyJoker = m_piecesOnBoard.find(keyCoordinate);
 
-    if (existingKey != m_piecesOnBoard.end() && m_isValid)
-    {
-        if (existingKey->second.size() == 0 ||
-            existingKey->second[0]->getOwnerId()
-                != nextMove.getPlayerId() ||
-            !existingKey->second[0]->canMove() ||
-                nextMove.getToCoordinate().getX() > m_numOfRows ||
-                nextMove.getToCoordinate().getY() > m_numOfColumns
-                )
-        {
-            m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
-            m_isValid = false;
-            return;
-        }
-    }
-    else
+    // Check move validity
+    if (!(m_isValid &&
+        isPieceAtLocation(existingKey, nextMove.getPlayerId()) &&
+        existingKey->second[0]->canMove() &&
+        isPieceLocationWithinRestrictions(nextMove.getToCoordinate())
+         ))
     {
         m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
         m_isValid = false;
         return;
     }
 
-    if (nextMove.getIsJokerMove() && m_isValid)
+    // A joker move
+    if (m_isValid && nextMove.getIsJokerMove())
     {
         keyCoordinateJoker = nextMove.getJokerLocation();
-        if (!((nextMove.getToCoordinate() == keyCoordinateJoker)
-            && existingKey->second[0]->isJoker()))
+        existingKeyJoker = m_piecesOnBoard.find(keyCoordinateJoker);
+
+        // Checks if joker is moving and changing in the same turn
+        // 1 means good move
+        // 0 means joker is not moving - do regular check
+        // -1 means bad move
+        unsigned int jokerValid = isJokerMoveAndChangingValid(nextMove.getToCoordinate(), existingKey, keyCoordinateJoker);
+
+        if (jokerValid == 1 ||
+                 (jokerValid == 0 &&
+                 isPieceAtLocation(existingKeyJoker, nextMove.getPlayerId()) &&
+                 existingKeyJoker->second[0]->isJoker()))
         {
-            existingKeyJoker = m_piecesOnBoard.find(keyCoordinateJoker);
-            if (existingKeyJoker != m_piecesOnBoard.end())
-            {
-                if (existingKeyJoker->second.size() == 0 ||
-                        existingKeyJoker->second[0]->getOwnerId() != nextMove.getPlayerId())
-                {
-                    m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
-                    m_isValid = false;
-                    return;
-                }
-                else
-                    makeJokerMove = true;
-            }
-            else
-            {
-                m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
-                m_isValid = false;
-                return;
-            }
+            makeJokerMove = true;
         }
         else
-            makeJokerMove = true;
-
+        {
+            m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
+            m_isValid = false;
+            return;
+        }
     }
 
     if (m_isValid)
@@ -253,8 +280,12 @@ void Board::makeNextMove(unsigned int m_winnerId)
         resolveDisputedCoordinates();
 
         if (makeJokerMove)
+        {
+            // In case the Joker moved
+            existingKeyJoker = m_piecesOnBoard.find(keyCoordinateJoker);
             existingKeyJoker->second[0]
                 ->changeJokerMask(nextMove.getNewJokerMask());
+        }
     }
 
     if (delayedNotValid)

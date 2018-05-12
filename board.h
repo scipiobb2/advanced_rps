@@ -58,7 +58,6 @@ public:
     unsigned int getInitialMovesErrorLine() const {return m_initialMovesErrorLine;}
     void setInitialMovesErrorLine(unsigned int lineNumber){m_initialMovesErrorLine = lineNumber;}
 
-
     friend std::ostream &operator<<(std::ostream &os, const Board &board);
 
 private:
@@ -66,8 +65,15 @@ private:
     unsigned int m_numOfRows;
 
     void addPieceToBoard(Piece *piece);
+
     std::unordered_map<Coordinate, std::vector<Piece *>> m_piecesOnBoard;
+
     bool isPieceLocationWithinRestrictions(Coordinate const coordinate ) const;
+
+    bool isPieceAtLocation(auto const existingKey, unsigned int playerId) const;
+
+    unsigned int isJokerMoveAndChangingValid(Coordinate const toCoordinate,
+                                 auto const existingKey, Coordinate const jokerLocation) const;
     bool m_isValid = true;
     BadPositioningError m_badPositioningError{};
     BadMovesInputError m_badMovesInput{};
