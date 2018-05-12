@@ -171,13 +171,6 @@ void Board::makeNextMove(unsigned int errorLine, unsigned int m_winnerId)
 
     auto nextMove = nextMoveSearch->second.second;
 
-    //m_badMovesInput.addBadMove(nextMove.getPlayerId(), nextMove.getLineNumber());
-
-    //pair<unsigned int, std::string> badMovePair(nextMove.getPlayerId(),
-    //"Reason: Bad Moves input file for player " +
-    //        to_string(nextMove.getPlayerId())+
-    //        " - line " + to_string(nextMove.getLineNumber()) + "\n");
-
     if (nextMove.getLineNumber() == errorLine)
     {
         if (nextMove.getPlayerId() == m_winnerId)

@@ -47,9 +47,6 @@ public:
 
     std::string getBoardPrint();
 
-    std::pair<unsigned int, std::string>
-                        getBadMovePair() const{return m_badMovePair;}
-
     BadPositioningError getBadPositioningError() const
         {return m_badPositioningError;}
 
@@ -84,8 +81,6 @@ private:
 
     unsigned int m_numOfMovesPlayed = 0;
     unsigned int m_moveNumberInMovesMap = 0;
-
-    std::pair<unsigned int, std::string> m_badMovePair;
 
 };
 
