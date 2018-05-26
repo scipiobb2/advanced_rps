@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include "player.h"
-#include "board.h"
+#include "my_board.h"
 #include "game.h"
 
 using namespace std;
@@ -23,6 +23,9 @@ int main()
     };
 
     string fileLocationPrefix = "";
+
+    //static_assert(std::is_abstract<my_Board>(),
+    //              "my_Board ought to be abstract.");
 
     while (NumberOfTests > 0)
     {
@@ -51,6 +54,7 @@ int main()
         try
         {
             Game game(&p1, &p2, fileLocationPrefix);
+
 
             game.playGame();
 

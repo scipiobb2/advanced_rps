@@ -1,8 +1,8 @@
-#include "move.h"
+#include "my_Move.h"
 
 using namespace std;
 
-Move::Move(Coordinate fromCoordinate, Coordinate toCoordinate,
+my_Move::my_Move(Coordinate fromCoordinate, Coordinate toCoordinate,
            unsigned int playerId, unsigned int lineNumber,
            bool isJokerMove ):
     m_fromCoordinate(fromCoordinate), m_toCoordinate(toCoordinate),
@@ -12,7 +12,7 @@ Move::Move(Coordinate fromCoordinate, Coordinate toCoordinate,
 
 }
 
-Move::Move(Coordinate fromCoordinate, Coordinate toCoordinate,
+my_Move::my_Move(Coordinate fromCoordinate, Coordinate toCoordinate,
            unsigned int playerId, unsigned int lineNumber,
            Coordinate jokerLocation, PieceName newJokerMask,
            bool isJokerMove ):
@@ -25,7 +25,7 @@ Move::Move(Coordinate fromCoordinate, Coordinate toCoordinate,
 }
 
 ostream &operator<<(ostream &os,
-                                const Move &move)
+                                const my_Move &move)
 {
     os<< "\tMove"<<
         "\t\t from location: " << move.m_fromCoordinate <<

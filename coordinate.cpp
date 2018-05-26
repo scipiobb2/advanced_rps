@@ -12,7 +12,7 @@ Coordinate::Coordinate(string x, string y):
 {}
 
 Coordinate::Coordinate(const Coordinate &rightCoordinate):
-    Coordinate(rightCoordinate.getX(), rightCoordinate.getY())
+    Coordinate(rightCoordinate.my_getX(), rightCoordinate.my_getY())
 {}
 
 ostream &operator<<(std::ostream &os, const Coordinate &coordinate)

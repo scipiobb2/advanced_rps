@@ -2,15 +2,25 @@
 #define PIECE_H
 #include "utils.hpp"
 #include "coordinate.h"
+#include "PiecePosition.h"
 
-class Piece
+class Piece : public PiecePosition
 {
 public:
+    Piece();
     Piece(PieceName pieceName, char letter, Coordinate coordinate,
           unsigned int ownerId, unsigned int readFromLine,
           bool isJoker = false,
           PieceName jokerMask = PieceName::Joker,
           bool isAlive = true) ;
+
+    const Coordinate& getPosition() const {return m_coordinate;}
+
+    char getPiece() const {return getLetter();}
+
+    char getJokerRep() const {return getJokerLetter();}
+
+
 
     bool isFlag() const {return m_pieceName == PieceName::Flag;}
 
@@ -34,6 +44,8 @@ public:
     bool getIsAlive() const {return m_isAlive;}
 
     char getLetter() const {return m_letter;}
+
+    char getJokerLetter() const;
 
     bool canMove() const;
 

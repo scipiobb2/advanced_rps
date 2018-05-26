@@ -1,18 +1,21 @@
 
-#include "board.h"
+#include "my_board.h"
 
 using namespace std;
 
-Board::Board()
+my_Board::my_Board()
 {}
 
-Board::Board(unsigned int n, unsigned int m,
+my_Board::my_Board(unsigned int n, unsigned int m,
                                 std::vector<Player *> vectorPlayers):
     m_numOfColumns(n), m_numOfRows(m)
 {
     // Add all pieces and moves form the input files to the board
     for (Player *p: vectorPlayers )
     {
+        m_playersMap.insert(pair<unsigned int, Player *>
+                  (p->getPlayerId(), p));
+
         if (p->getBadPositioningError().continueFlow())
         {
         addPieceVectorToBoard(p->getPieces());
@@ -22,18 +25,18 @@ Board::Board(unsigned int n, unsigned int m,
     }
 }
 
-bool Board::isPieceLocationWithinRestrictions(Coordinate const coordinate ) const
+bool my_Board::isPieceLocationWithinRestrictions(Coordinate const coordinate ) const
 {
-    if (coordinate.getX() > m_numOfRows ||
-        coordinate.getY() > m_numOfColumns ||
-        coordinate.getX() < 1 ||
-        coordinate.getY() < 1 )
+    if (coordinate.my_getX() > m_numOfRows ||
+        coordinate.my_getY() > m_numOfColumns ||
+        coordinate.my_getX() < 1 ||
+        coordinate.my_getY() < 1 )
         return false;
 
     return true;
 }
 
-bool Board::isPieceAtLocation(auto const existingKey, unsigned int playerId) const
+bool my_Board::isPieceAtLocation(auto const &existingKey, unsigned int playerId) const
 {
     if (existingKey == m_piecesOnBoard.end())
         return false;
@@ -47,7 +50,7 @@ bool Board::isPieceAtLocation(auto const existingKey, unsigned int playerId) con
     return true;
 }
 
-unsigned int Board::isJokerMoveAndChangingValid(Coordinate const toCoordinate,
+unsigned int my_Board::isJokerMoveAndChangingValid(Coordinate const toCoordinate,
                              auto const existingKey, Coordinate const jokerLocation) const
 {
     // Not relevant for this test
@@ -65,7 +68,7 @@ unsigned int Board::isJokerMoveAndChangingValid(Coordinate const toCoordinate,
     return 0;
 }
 
-void Board::addPieceToBoard(Piece* piece)
+void my_Board::addPieceToBoard(Piece* piece)
 {
     Coordinate keyCoordinate = piece->getCoordinate();
 
@@ -92,7 +95,7 @@ void Board::addPieceToBoard(Piece* piece)
         if (existingKey->second.size() > 1)
         {
             // To Do - Assumes only two players
-            // If the new piece is from the same owner that is an error
+            // If the new piece is from the same owner, it's an error
             if (existingKey->second[0]->getOwnerId() ==
                     existingKey->second[1]->getOwnerId())
             {
@@ -116,51 +119,60 @@ void Board::addPieceToBoard(Piece* piece)
     }
 }
 
-void Board::addMoveToBoard(unsigned int const moveNumber,
-                    unsigned int const playerId, Move const &move)
+void my_Board::addMoveToBoard(unsigned int const moveNumber,
+                    my_Move const &move)
 {
-    pair<unsigned int, Move> newMove (playerId, move);
-
-    m_moves.insert(pair<unsigned int, pair<unsigned int, Move>>
-                   (moveNumber, newMove));
+    m_moves.insert(pair<unsigned int, my_Move>
+                   (moveNumber, move));
 }
 
-void Board::addPieceVectorToBoard(vector<Piece>* vectorPiece)
+void my_Board::addPieceVectorToBoard(vector<Piece>* vectorPiece)
 {
 
     for (Piece &p: * vectorPiece )
     {
-        Board::addPieceToBoard(&p);
+        my_Board::addPieceToBoard(&p);
     }
 }
 
-void Board::addMoveVectorToBoard(unsigned int const playerId,
-                                 vector<Move> const &vectorMove,
+void my_Board::addMoveVectorToBoard(unsigned int const playerId,
+                                 vector<my_Move> const &vectorMove,
                                  unsigned int numberOfPlayers)
 {
     // Moves are add separately for each player but enough room
     // is left for the other players to fill in their moves
     int i = 0;
-    for (Move const &m : vectorMove)
+    bool empty = true;
+    for (my_Move const &m : vectorMove)
     {
-        while ((i % numberOfPlayers) != (playerId - 1))
+        while (true)
+        {
+            if  (m_moves.find(i) == m_moves.end())
+                empty = true;
+            else
+                empty = false;
+            if (((i % numberOfPlayers) == (playerId - 1)) && empty)
+                break;
             i++;
-        addMoveToBoard(i, playerId, m);
+        }
+        addMoveToBoard(i, m);
         i++;
     }
 }
 
 // To Do - Assumes only two players are in dispute
-void Board::resolveDisputedCoordinates(){
+void my_Board::resolveDisputedCoordinates(){
     for (auto &c : m_disputedCoordinates)
     {
         // Part of the m_disputedCoordinates promise is that
         // the coordinate is on the board
         auto existingKey = m_piecesOnBoard.find(c);
 
-        int winner = Advanced_RPS_Fight::twoPiecesFight(
-                    existingKey->second[0]->pieceNameForFight(),
-                    existingKey->second[1]->pieceNameForFight());
+        auto tempFight = my_FightInfo(c,
+                *existingKey->second[0],
+                *existingKey->second[1]);
+        int winner = tempFight.getWinner();
+
         if (winner == 0)
         {
             existingKey->second[0]->setToDead();
@@ -184,8 +196,9 @@ void Board::resolveDisputedCoordinates(){
     m_disputedCoordinates.clear();
 }
 
-void Board::makeNextMove(unsigned int m_winnerId)
+void my_Board::makeNextMove(unsigned int m_winnerId)
 {
+
     bool makeJokerMove = false;
     bool delayedNotValid = false;
 
@@ -201,7 +214,10 @@ void Board::makeNextMove(unsigned int m_winnerId)
         nextMoveSearch = m_moves.find(m_moveNumberInMovesMap++);
     }
 
-    auto nextMove = nextMoveSearch->second.second;
+    auto nextMove = nextMoveSearch->second;
+
+    //cout << nextMove.getPlayerId();
+    //cout << nextMove;
 
     // The moves file has an error but we must play the game until
     // that error is reached
@@ -269,6 +285,9 @@ void Board::makeNextMove(unsigned int m_winnerId)
 
     if (m_isValid)
     {
+
+        //p->increaseNumberOfMovesPlayed();
+
         auto movingPiece = existingKey->second[0];
 
         existingKey->second.erase(existingKey->second.begin());
@@ -292,21 +311,8 @@ void Board::makeNextMove(unsigned int m_winnerId)
         m_isValid = false;
 }
 
-// Broken
-void Board::makeXMoves(unsigned int numberOfMoves)
-{
-    for (unsigned int i = 0; i < numberOfMoves; i++)
-        makeNextMove();
-}
 
-// Broken
-void Board::makeAllMoves()
-{
-    for (unsigned int i = 0; i < m_moves.size(); i++)
-        makeNextMove();
-}
-
-string Board::getBoardPrint()
+string my_Board::getBoardPrint()
 {
     //string returnString = " 12345678910\n";
     string returnString = "";
@@ -338,8 +344,25 @@ string Board::getBoardPrint()
     return returnString;
 }
 
+
+int my_Board::getPlayer(const Point& pos) const
+{
+    Coordinate keyCoordinate(
+                (unsigned int)pos.getX(),
+                (unsigned int)pos.getY());
+    auto existingKey = m_piecesOnBoard.find(keyCoordinate);
+
+    if (isPieceAtLocation(existingKey, 1))
+        return 1;
+    else if (isPieceAtLocation(existingKey, 2))
+        return 2;
+    else
+        return 0;
+}
+
+
 // For testing
-ostream &operator<<(ostream &os, const Board &board)
+ostream &operator<<(ostream &os, const my_Board &board)
 {
     os << "Board pieces:" << "\n";
 
@@ -371,8 +394,8 @@ ostream &operator<<(ostream &os, const Board &board)
     for (auto const & move_map: board.m_moves )
     {
         os << "\tMove number:" << 1 + i++ << "  " <<
-            "\tId of player:"<< move_map.second.first << "\n" <<
-            move_map.second.second;
+            "\tId of player:"<< move_map.second.getPlayerId() << "\n" <<
+            move_map.second;
 
     }
     os << "Moves played: " << board.m_numOfMovesPlayed;

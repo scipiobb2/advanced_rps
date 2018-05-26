@@ -14,6 +14,10 @@
 #include <stdlib.h>
 #include <set>
 #include <cmath>
+#include <type_traits>
+#include <memory>
+
+using std::unique_ptr;
 
 #define N 10
 #define M 10
@@ -26,6 +30,19 @@
 
 enum class PieceName
     {Flag = 1, Rock, Paper, Scissors, Joker, Bomb};
+
+inline char getLetterFromPieceName(const PieceName& p)
+{
+
+   if (p == PieceName::Bomb) return 'B';
+  else if (p == PieceName::Paper) return 'P';
+  else if (p == PieceName::Rock) return 'R';
+  else if (p == PieceName::Scissors) return 'S';
+  else if (p == PieceName::Flag) return 'F';
+  else if (p == PieceName::Joker) return 'J';
+  else
+   return '#';
+}
 
 namespace std
 {

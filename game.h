@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 #include "utils.hpp"
-#include "board.h"
+#include "my_board.h"
 #include "player.h"
 
 class Game
@@ -15,22 +15,28 @@ public:
                        const std::string& filename2);
 private:
     std::string m_fileLocationPrefix;
-    Board m_board;
+    my_Board m_board;
     std::vector<Player *> m_players;
     unsigned int m_winnerId = 0;
+    my_Move * m_nextMove;
     bool m_isEnded = false;
-    //unsigned int m_errorLine = 0;
     std::string m_endGameReason;
 
-    bool checkInitialPositionValidity();
-    bool checkInitialMovesValidity();
+    //unsigned int whoPlayesNext() const;
+    void checkInitialPositionValidity();
+    void checkInitialMovesValidity();
+
+    unsigned int whoPlayesNext() const;
 
     void checkIfSomeoneWon();
+    void addMoveIfNeeded();
     void checkIfNoMoreMoves();
     void updateAllPlayersCounts();
     void checkIfFlagsCapturesInInitialPosition();
     void checkIfBothPlayersCantMove();
     void checkPieceValidity();
+
+    std::string getGameWinnerAnnouncementString() const;
 
 };
 

@@ -1,8 +1,9 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H
 #include "utils.hpp"
+#include "Point.h"
 
-class Coordinate
+class Coordinate : public Point
 {
 public:
     Coordinate();
@@ -10,8 +11,11 @@ public:
     Coordinate(std::string x, std::string y);
     Coordinate(const Coordinate &rightCoordinate);
 
-    unsigned int getX() const {return m_x;}
-    unsigned int getY() const {return m_y;}
+    unsigned int my_getX() const {return m_x;}
+    unsigned int my_getY() const {return m_y;}
+
+    int getX() const {return (int) m_x;}
+    int getY() const {return (int) m_y;}
 
     bool operator==(Coordinate const& other) const
     {
@@ -27,8 +31,8 @@ public:
 
     Coordinate& operator=(Coordinate const& other)
     {
-        m_x = other.getX();
-        m_y = other.getY();
+        m_x = other.my_getX();
+        m_y = other.my_getY();
         return *this;
     }
 
@@ -46,8 +50,8 @@ namespace std
 
         size_t operator()(Coordinate const& coordinate) const
         {
-          size_t h1 = std::hash<double>()(coordinate.getX());
-          size_t h2 = std::hash<double>()(coordinate.getY());
+          size_t h1 = std::hash<double>()(coordinate.my_getX());
+          size_t h2 = std::hash<double>()(coordinate.my_getY());
           return (h1 ^ (h2 << 1));
         }
     };

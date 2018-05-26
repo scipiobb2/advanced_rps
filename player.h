@@ -3,16 +3,38 @@
 #include "utils.hpp"
 #include "coordinate.h"
 #include "piece.h"
-#include "move.h"
+#include "my_Move.h"
 #include "error.h"
+#include "PlayerAlgorithm.h"
 
-class Player
+class Player : public PlayerAlgorithm
 {
 public:
     Player(int id,
             std::string initialPositionsFileName,
             std::string movesFileName,
             std::unordered_map<std::string, unsigned int> restrictions);
+
+    void getInitialPositions(int player,
+        std::vector<unique_ptr<PiecePosition>>& vectorToFill);
+
+    virtual void notifyOnInitialBoard(const Board& b,
+        const std::vector<unique_ptr<FightInfo>>& fights)
+    {(void)b; (void)fights;}
+
+    virtual void notifyOnOpponentMove(const Move& move) // called only on opponents move
+    {(void)move;}
+
+    virtual void notifyFightResult(const FightInfo& fightInfo) // called only if there was a fight
+    {(void)fightInfo;}
+
+    unique_ptr<Move> getMove();
+
+    unique_ptr<JokerChange> getJokerChange(); // nullptr if no change is requested
+
+    my_Move * getFileMove();
+
+    bool outOfMoves() const;
 
     void readInitialPosition();
 
@@ -22,7 +44,7 @@ public:
 
     unsigned int getPlayerId() const {return m_id;}
 
-    std::vector<Move> getMoves() const {return m_moves;}
+    std::vector<my_Move> getMoves() const {return m_moves;}
 
 
     void updateAlivePiecesCount();
@@ -39,6 +61,10 @@ public:
 
     void setLostGame() {m_isLostGame = true;}
 
+    void increaseNumberOfMovesPlayed() {m_numberOfMovesPlayed++;}
+
+    bool isPlayingFromFile() {return m_playingFromFile;}
+
     MissingFileError getMissingFileError() const
         {return m_missingFileError;}
 
@@ -54,18 +80,21 @@ private:
     unsigned int m_id;
     std::vector<Piece> m_pieces;
     int m_points = 0;
-    std::vector<Move> m_moves;
+    std::vector<my_Move> m_moves;
     std::string m_initialPositionsFileName;
     std::string m_movesFileName;
     MissingFileError m_missingFileError{};
     BadPositioningError m_badPositioningError{};
     BadMovesInputError m_badMovesInput{};
+    unsigned int m_numberOfMovesPlayed = 0;
     unsigned int m_numberOfPiecesAlive;
     unsigned int m_numberOfPiecesThatCanMove;
     unsigned int m_numberOfFlagsAlive;
     unsigned int m_maxXSize;
     unsigned int m_maxYSize;
     bool m_isLostGame = false;
+
+    bool m_playingFromFile = true;
 
     std::unordered_map<PieceName, std::pair<unsigned int, unsigned int>>
         m_pieceCount;

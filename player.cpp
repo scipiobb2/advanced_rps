@@ -264,7 +264,7 @@ void Player::readMoves()
             {
                 if (tokens.size() == 8)
                 {
-                    m_moves.push_back(Move(
+                    m_moves.push_back(my_Move(
                     Coordinate(tokens[0], tokens[1]),
                     Coordinate(tokens[2], tokens[3]),
                     m_id, i,
@@ -273,7 +273,7 @@ void Player::readMoves()
                 }
                 else
                 {
-                    m_moves.push_back(Move(Coordinate(tokens[0], tokens[1]),
+                    m_moves.push_back(my_Move(Coordinate(tokens[0], tokens[1]),
                         Coordinate(tokens[2], tokens[3]), m_id, i));
                 }
             }
@@ -321,7 +321,56 @@ void Player::updateAlivePiecesCount()
     m_numberOfPiecesThatCanMove = numberOfPiecesThatCanMove;
 }
 
+void Player::getInitialPositions(int player,
+    std::vector<unique_ptr<PiecePosition>>& vectorToFill)
+{
+    if (player == (int) m_id)
+    {
+        for (auto p : m_pieces)
+        {
+            vectorToFill.push_back( make_unique<Piece>(p));
+        }
+    }
+}
 
+unique_ptr<Move> Player::getMove()
+{
+    unsigned int i = 0;
+    for (auto m : m_moves)
+    {
+        if (m_numberOfMovesPlayed == i++)
+            return make_unique<my_Move>(m);
+    }
+
+    // Should not get here
+    return nullptr;
+}
+
+my_Move * Player::getFileMove()
+{
+    if (m_numberOfMovesPlayed >= m_moves.size())
+        return NULL;
+
+    return &m_moves[m_numberOfMovesPlayed];
+}
+
+unique_ptr<JokerChange> Player::getJokerChange()
+{
+    unsigned int i = 0;
+    for (auto m : m_moves)
+    {
+        if (m_numberOfMovesPlayed == i++)
+        {
+            if (m.getIsJokerMove())
+                return make_unique<my_Move>(m);
+            else
+                return nullptr;
+        }
+    }
+
+    // Should not get here
+    return nullptr;
+}
 
 ostream &operator<<(std::ostream &os,
                                 const Player &player)

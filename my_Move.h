@@ -2,24 +2,39 @@
 #define MOVE_H
 #include "utils.hpp"
 #include "coordinate.h"
+#include "Move.h"
+#include "JokerChange.h"
 
-class Move
+class my_Move : public Move, public JokerChange
 {
 public:
-    Move(Coordinate fromCoordinate, Coordinate toCoordinate,
+    my_Move();
+
+    my_Move(Coordinate fromCoordinate, Coordinate toCoordinate,
          unsigned int playerId, unsigned int lineNumber,
          bool isJokerMove = false);
 
-    Move(Coordinate fromCoordinate, Coordinate toCoordinate,
+    my_Move(Coordinate fromCoordinate, Coordinate toCoordinate,
          unsigned int playerId, unsigned int lineNumber,
          Coordinate m_JokerLocation, PieceName newJokerMask,
          bool isJokerMove = true);
 
-    Coordinate getFromCoordinate() const {return m_fromCoordinate;}
+    const Coordinate& getFrom() const {return getFromCoordinate();}
 
-    Coordinate getToCoordinate() const {return m_toCoordinate;}
+    const Coordinate& getTo() const {return getToCoordinate();}
 
-    Coordinate getJokerLocation() const {return m_jokerLocation;}
+    const Coordinate& getJokerChangePosition()
+                            const {return getJokerLocation();}
+
+    char getJokerNewRep() const
+        {return getLetterFromPieceName(getNewJokerMask());}
+
+
+    const Coordinate& getFromCoordinate() const {return m_fromCoordinate;}
+
+    const Coordinate& getToCoordinate() const {return m_toCoordinate;}
+
+    const Coordinate& getJokerLocation() const {return m_jokerLocation;}
 
     bool getIsJokerMove() const {return m_isJokerMove;}
 
@@ -32,7 +47,7 @@ public:
 
 
     friend std::ostream &operator<<(std::ostream &os,
-                                    const Move &move);
+                                    const my_Move &move);
 private:
     Coordinate m_fromCoordinate;
     Coordinate m_toCoordinate;

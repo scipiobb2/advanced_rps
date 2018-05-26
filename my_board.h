@@ -3,33 +3,30 @@
 #include "utils.hpp"
 #include "coordinate.h"
 #include "piece.h"
-#include "move.h"
+#include "my_Move.h"
 #include "player.h"
-#include "advanced_rps_fight.h"
+#include "my_fightinfo.h"
+#include "Board.h"
 
-class Board
+class my_Board : public Board
 {
 
 public:
-    Board();
+    my_Board();
 
-    Board(unsigned int n, unsigned int m, std::vector<Player *> vectorPlayers);
+    my_Board(unsigned int n, unsigned int m, std::vector<Player *> vectorPlayers);
+
+    int getPlayer(const Point& pos) const;
 
     void addPieceVectorToBoard(std::vector<Piece> *vectorPiece);
 
     void addMoveVectorToBoard(unsigned int const playerId,
-                              std::vector<Move> const &vectorMove,
+                              std::vector<my_Move> const &vectorMove,
                               unsigned int numberOfPlayers);
 
     void resolveDisputedCoordinates();
 
     void makeNextMove(unsigned int m_winnerId = 0);
-
-    //For debug
-    void makeXMoves(unsigned int numberOfMoves);
-
-    //For debug
-    void makeAllMoves();
 
 
     unsigned int getNumberOfMovesLeft() const
@@ -52,17 +49,19 @@ public:
     BadMovesInputError getBadMovesInputError() const
         {return m_badMovesInput;}
 
-    bool getmIsValid() const {return  m_isValid;}
+    bool getIsValid() const {return  m_isValid;}
     void setNotValid(){m_isValid = false; }
 
     unsigned int getInitialMovesErrorLine() const {return m_initialMovesErrorLine;}
     void setInitialMovesErrorLine(unsigned int lineNumber){m_initialMovesErrorLine = lineNumber;}
 
-    friend std::ostream &operator<<(std::ostream &os, const Board &board);
+    friend std::ostream &operator<<(std::ostream &os, const my_Board &board);
 
 private:
     unsigned int m_numOfColumns;
     unsigned int m_numOfRows;
+
+    std::unordered_map<unsigned int, Player *> m_playersMap;
 
     void addPieceToBoard(Piece *piece);
 
@@ -70,7 +69,7 @@ private:
 
     bool isPieceLocationWithinRestrictions(Coordinate const coordinate ) const;
 
-    bool isPieceAtLocation(auto const existingKey, unsigned int playerId) const;
+    bool isPieceAtLocation(auto const &existingKey, unsigned int playerId) const;
 
     unsigned int isJokerMoveAndChangingValid(Coordinate const toCoordinate,
                                  auto const existingKey, Coordinate const jokerLocation) const;
@@ -79,16 +78,19 @@ private:
     BadMovesInputError m_badMovesInput{};
 
     void addMoveToBoard(unsigned int const moveNumber,
-                        unsigned int const playerId, Move const &move);
+                        my_Move const &move);
 
-    // (moveNumber, (playerId, move)
-    std::map<unsigned int, std::pair<unsigned int, Move>> m_moves;
+    // (moveNumber, move)
+    //std::map<unsigned int, Move> m_moves;
+    std::map<unsigned int, my_Move> m_moves;
 
 
     std::vector<Coordinate> m_disputedCoordinates;
 
     unsigned int m_numOfMovesPlayed = 0;
     unsigned int m_moveNumberInMovesMap = 0;
+
+    unsigned int m_maxMoveNumberInMovesMap = 0;
 
     unsigned int m_initialMovesErrorLine = 0;
 

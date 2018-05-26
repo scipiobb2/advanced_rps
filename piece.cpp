@@ -32,6 +32,14 @@ void Piece::changeJokerMask(PieceName const &newMask)
     m_jokerMask = newMask;
 }
 
+char Piece::getJokerLetter() const
+{
+   if (m_isJoker)
+       return getLetterFromPieceName(m_jokerMask);
+   else
+       return '#';
+}
+
 ostream &operator<<(ostream &os,
                                 const Piece &piece)
 {
